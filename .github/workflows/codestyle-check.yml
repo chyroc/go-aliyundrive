@@ -1,0 +1,34 @@
+name: codestyle-check
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+
+  run:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
+
+    - name: Set up Check Tool
+      run: |
+        go get -u github.com/client9/misspell/cmd/misspell
+
+    - name: Code Style Check
+      run: |
+        ls -alh
+        go build -v ./...
+        gofmt -s
+        go vet ./...
+        misspell -error
+        curl 'https://goreportcard.com/checks' -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' --data-raw 'repo=github.com%2Fchyroc%2Fgo-aliyundrive'
