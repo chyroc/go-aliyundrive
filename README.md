@@ -2,10 +2,6 @@
 
 > 阿里云盘 Go SDK
 
-## 广告位
-
-- 阿里云盘 webdav 版: https://github.com/chyroc/aliyundrive-webdav
-
 ## 安装
 
 ```shell
@@ -58,3 +54,7 @@ sharedInfo, err := ins.ShareLink.GetShareByAnonymous(ctx, &aliyundrive.GetShareB
 ```
 
 <img src="screenshots/get-share.png" width="300px" >
+
+## 其他
+
+- 阿里云盘命令行客户端: https://github.com/chyroc/aliyundrive-cli
