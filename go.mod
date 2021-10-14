@@ -3,7 +3,7 @@ module github.com/chyroc/go-aliyundrive
 go 1.17
 
 require (
-	github.com/chyroc/gorequests v0.28.0
+	github.com/chyroc/gorequests v0.29.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
