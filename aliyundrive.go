@@ -27,6 +27,12 @@ func WithWorkDir(dir string) ClientOptionFunc {
 	}
 }
 
+func WithStore(store Store) ClientOptionFunc {
+	return func(ins *AliyunDrive) {
+		ins.store = store
+	}
+}
+
 type AuthService struct {
 	cli *AliyunDrive
 }
