@@ -42,7 +42,10 @@ func (r *AuthService) LoginByQrcode(ctx context.Context) (*GetSelfUserResp, erro
 	if userInfo != nil && userInfo.UserID != "" {
 		return userInfo, nil
 	}
-
+	err = r.cli.store.Set(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
 	if err := r.internalLoginByQrcode(ctx); err != nil {
 		return nil, err
 	}
