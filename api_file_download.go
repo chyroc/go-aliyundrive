@@ -87,7 +87,7 @@ func downloadURL(url string, filename string, showProgressBar bool) error {
 	if err != nil {
 		return err
 	}
-	f.Close()
+	defer f.Close()
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
