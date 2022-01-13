@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -49,12 +48,8 @@ func (r *FileService) DownloadFile(ctx context.Context, request *DownloadFileReq
 		return err
 	}
 
-	file, err := downloadURL(res.URL, request.ShowProgressBar)
+	err = downloadURL(res.URL, distName, request.ShowProgressBar)
 	if err != nil {
-		return err
-	}
-
-	if err = os.Rename(file, distName); err != nil {
 		return err
 	}
 	return nil
@@ -79,15 +74,24 @@ const (
 
 var downloadHttpClient = http.Client{}
 
-func downloadURL(url string, showProgressBar bool) (string, error) {
-	f, err := ioutil.TempFile("", "ali-drive-*")
+func downloadURL(url string, filename string, showProgressBar bool) error {
+	var deleteTemp = true
+	var tmp = filename + ".tmp"
+	defer func() {
+		// 任何的异常退出都会导致临时文件被删除
+		if deleteTemp {
+			os.Remove(tmp)
+		}
+	}()
+	f, err := os.Create(tmp)
 	if err != nil {
-		return "", err
+		return err
 	}
+	f.Close()
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return "", err
+		return err
 	}
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Referer", "https://www.aliyundrive.com/")
@@ -96,7 +100,7 @@ func downloadURL(url string, showProgressBar bool) (string, error) {
 
 	resp, err := downloadHttpClient.Do(req)
 	if err != nil {
-		return "", err
+		return err
 	}
 	defer resp.Body.Close()
 
@@ -120,13 +124,17 @@ func downloadURL(url string, showProgressBar bool) (string, error) {
 		defer reader.Close()
 
 		if _, err := io.Copy(f, reader); err != nil {
-			return "", err
+			return err
 		}
 	} else {
 		if _, err := io.Copy(f, resp.Body); err != nil {
-			return "", err
+			return err
 		}
 	}
+	if err := os.Rename(tmp, filename); err != nil {
+		return err
+	}
+	deleteTemp = false
 
-	return f.Name(), nil
+	return nil
 }
