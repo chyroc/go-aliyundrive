@@ -9,8 +9,7 @@ import (
 	"strings"
 
 	"github.com/chyroc/go-aliyundrive/internal/helper_tool"
-	"github.com/vbauerster/mpb/v5"
-	"github.com/vbauerster/mpb/v5/decor"
+	"github.com/schollz/progressbar/v3"
 )
 
 // GetFile 获取文件信息
@@ -105,27 +104,16 @@ func downloadURL(url string, filename string, showProgressBar bool) error {
 	defer resp.Body.Close()
 
 	if showProgressBar {
-		fileSize := resp.ContentLength
-		progress := mpb.New(mpb.WithWidth(20))
-		bar := progress.AddBar(
-			fileSize,
-			// 进度条前的修饰
-			mpb.PrependDecorators(
-				decor.Name("[download] "),
-				decor.CountersKibiByte("% .2f / % .2f"), // 已下载数量
-				decor.Percentage(decor.WCSyncSpace),     // 进度百分比
-			),
-			// 进度条后的修饰
-			mpb.AppendDecorators(
-				decor.EwmaSpeed(decor.UnitKiB, "% .2f", 60),
-			),
+		bar := progressbar.DefaultBytes(
+			resp.ContentLength,
+			"downloading",
 		)
-		reader := bar.ProxyReader(resp.Body)
-		defer reader.Close()
+		io.Copy(io.MultiWriter(f, bar), resp.Body)
 
-		if _, err := io.Copy(f, reader); err != nil {
+		if _, err := io.Copy(io.MultiWriter(f, bar), resp.Body); err != nil {
 			return err
 		}
+
 	} else {
 		if _, err := io.Copy(f, resp.Body); err != nil {
 			return err
