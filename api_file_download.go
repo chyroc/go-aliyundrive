@@ -108,7 +108,6 @@ func downloadURL(url string, filename string, showProgressBar bool) error {
 			resp.ContentLength,
 			"downloading",
 		)
-		io.Copy(io.MultiWriter(f, bar), resp.Body)
 
 		if _, err := io.Copy(io.MultiWriter(f, bar), resp.Body); err != nil {
 			return err
