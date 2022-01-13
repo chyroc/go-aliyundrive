@@ -54,6 +54,31 @@ func (r *FileService) DownloadFile(ctx context.Context, request *DownloadFileReq
 	return nil
 }
 
+// DownloadFileStream 获取文件流
+func (r *FileService) DownloadFileStream(ctx context.Context, driveID, fileID string) (io.ReadCloser, error) {
+	res, err := r.GetFileDownloadURL(ctx, &GetFileDownloadURLReq{DriveID: driveID, FileID: fileID})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, res.URL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("Referer", "https://www.aliyundrive.com/")
+	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
+	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
+
+	resp, err := downloadHttpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("incorrect status code: %v", resp.Status)
+	}
+	return resp.Body, nil
+}
+
 type DownloadFileReq struct {
 	DriveID         string                   `json:"drive_id"`
 	FileID          string                   `json:"file_id"`

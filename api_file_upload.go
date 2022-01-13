@@ -11,7 +11,19 @@ import (
 )
 
 func (r *FileService) UploadFile(ctx context.Context, request *UploadFileReq) (*UploadFileResp, error) {
-	return r.uploadFile(ctx, request.DriveID, request.ParentID, request.FilePath)
+	file, err := os.Open(request.FilePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return nil, err
+	} else if fileInfo.IsDir() {
+		// TODO：支持文件夹
+		return nil, fmt.Errorf("unsupport dir upload")
+	}
+	return r.UploadStream(ctx, request.DriveID, request.ParentID, path.Base(fileInfo.Name()), file, fileInfo.Size())
 }
 
 type UploadFileReq struct {
@@ -47,27 +59,16 @@ type UploadFileResp struct {
 	Location string `json:"location"`
 }
 
-func (r *FileService) uploadFile(ctx context.Context, driveID, parentID string, filepath string) (*UploadFileResp, error) {
-	file, err := os.Open(filepath)
-	if err != nil {
-		return nil, err
-	}
-	fileInfo, err := file.Stat()
-	if err != nil {
-		return nil, err
-	} else if fileInfo.IsDir() {
-		// TODO：支持文件夹
-		return nil, fmt.Errorf("unsupport dir upload")
-	}
-
+// UploadStream 从流上传文件
+func (r *FileService) UploadStream(ctx context.Context, driveID, parentID, name string, stream io.Reader, streamSize int64) (*UploadFileResp, error) {
 	proofResp, err := r.createFileWithProof(ctx, &createFileWithProofReq{
 		DriveID:       driveID,
-		PartInfoList:  makePartInfoList(fileInfo.Size()),
+		PartInfoList:  makePartInfoList(streamSize),
 		ParentFileID:  parentID,
-		Name:          path.Base(fileInfo.Name()),
+		Name:          name,
 		Type:          "file",
 		CheckNameMode: "auto_rename",
-		Size:          fileInfo.Size(),
+		Size:          streamSize,
 		PreHash:       "",
 	})
 	if err != nil {
@@ -76,7 +77,7 @@ func (r *FileService) uploadFile(ctx context.Context, driveID, parentID string, 
 
 	for _, part := range proofResp.PartInfoList {
 		// TODO: 并发？
-		if err := r.uploadPart(ctx, part.UploadURL, io.LimitReader(file, maxPartSize)); err != nil {
+		if err := r.uploadPart(ctx, part.UploadURL, io.LimitReader(stream, maxPartSize)); err != nil {
 			return nil, err
 		}
 	}
