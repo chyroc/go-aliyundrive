@@ -8,8 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/chyroc/go-aliyundrive/internal/helper_tool"
 	"github.com/schollz/progressbar/v3"
+
+	"github.com/chyroc/go-aliyundrive/internal/helper_tool"
 )
 
 // GetFile 获取文件信息

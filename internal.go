@@ -14,9 +14,10 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/chyroc/go-aliyundrive/internal/helper_tool"
 	"github.com/chyroc/gorequests"
 	"github.com/sirupsen/logrus"
+
+	"github.com/chyroc/go-aliyundrive/internal/helper_tool"
 )
 
 type RawRequestReq struct {

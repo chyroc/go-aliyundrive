@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 
-	"github.com/chyroc/go-aliyundrive"
 	"github.com/davecgh/go-spew/spew"
+
+	"github.com/chyroc/go-aliyundrive"
 )
 
 // 扫码登录

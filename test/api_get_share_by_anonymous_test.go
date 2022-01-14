@@ -4,9 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/chyroc/go-aliyundrive"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/chyroc/go-aliyundrive"
 )
 
 func Test_GetShare(t *testing.T) {

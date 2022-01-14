@@ -4,8 +4,9 @@ import (
 	"context"
 	"flag"
 
-	"github.com/chyroc/go-aliyundrive"
 	"github.com/davecgh/go-spew/spew"
+
+	"github.com/chyroc/go-aliyundrive"
 )
 
 func main() {
