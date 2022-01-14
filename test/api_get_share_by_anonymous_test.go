@@ -10,6 +10,8 @@ import (
 )
 
 func Test_GetShare(t *testing.T) {
+	t.Skip()
+
 	as := assert.New(t)
 	ctx := context.TODO()
 
