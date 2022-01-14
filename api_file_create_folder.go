@@ -41,21 +41,21 @@ func (r *FileService) CreateFolder(ctx context.Context, request *CreateFolderReq
 }
 
 type CreateFolderReq struct {
-	DriveID       string `json:"drive_id"`
-	ParentFileID  string `json:"parent_file_id"`
-	Name          string `json:"name"`
-	CheckNameMode string `json:"check_name_mode"`
-	Type          string `json:"type"`
+	DriveID       string   `json:"drive_id"`
+	ParentFileID  string   `json:"parent_file_id"`
+	Name          string   `json:"name"`
+	CheckNameMode string   `json:"check_name_mode"`
+	Type          FileType `json:"type"`
 }
 
 type CreateFolderResp struct {
-	ParentFileID string `json:"parent_file_id"`
-	Type         string `json:"type"`
-	FileID       string `json:"file_id"`
-	DomainID     string `json:"domain_id"`
-	DriveID      string `json:"drive_id"`
-	FileName     string `json:"file_name"`
-	EncryptMode  string `json:"encrypt_mode"`
+	ParentFileID string   `json:"parent_file_id"`
+	Type         FileType `json:"type"`
+	FileID       string   `json:"file_id"`
+	DomainID     string   `json:"domain_id"`
+	DriveID      string   `json:"drive_id"`
+	FileName     string   `json:"file_name"`
+	EncryptMode  string   `json:"encrypt_mode"`
 }
 
 type createFolderResp struct {

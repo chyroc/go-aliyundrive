@@ -78,7 +78,8 @@ func (r *FileService) getFileList(ctx context.Context, request *GetFileListReq) 
 type GetFileListReq struct {
 	GetAll bool `json:"get_all"`
 
-	DriveID               string `json:"drive_id"`
+	ShareID               string `json:"share_id"` // drive_id 和 share_id 必选传其中一个
+	DriveID               string `json:"drive_id"` // drive_id 和 share_id 必选传其中一个
 	ParentFileID          string `json:"parent_file_id"`
 	Marker                string `json:"marker"`
 	Limit                 int    `json:"limit"`
