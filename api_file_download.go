@@ -21,6 +21,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/schollz/progressbar/v3"
@@ -147,7 +148,7 @@ func downloadURL(url string, filename string, showProgressBar bool) error {
 	if showProgressBar {
 		bar := progressbar.DefaultBytes(
 			resp.ContentLength,
-			"downloading",
+			path.Base(filename),
 		)
 
 		if _, err := io.Copy(io.MultiWriter(f, bar), resp.Body); err != nil {
