@@ -14,6 +14,7 @@ require (
 require (
 	github.com/chyroc/persistent-cookiejar v0.1.0 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
+	github.com/mdp/qrterminal v1.0.1 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
@@ -22,4 +23,5 @@ require (
 	golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
+	rsc.io/qr v0.2.0 // indirect
 )
