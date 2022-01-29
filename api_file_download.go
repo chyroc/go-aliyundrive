@@ -27,6 +27,7 @@ import (
 	"github.com/schollz/progressbar/v3"
 
 	"github.com/chyroc/go-aliyundrive/internal/helper_tool"
+	runewidth "github.com/mattn/go-runewidth"
 )
 
 // GetFile 获取文件信息
@@ -148,7 +149,7 @@ func downloadURL(url string, filename string, showProgressBar bool) error {
 	if showProgressBar {
 		bar := progressbar.DefaultBytes(
 			resp.ContentLength,
-			path.Base(filename),
+			runewidth.FillRight(path.Base(filename), 40),
 		)
 
 		if _, err := io.Copy(io.MultiWriter(f, bar), resp.Body); err != nil {
