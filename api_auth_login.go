@@ -21,11 +21,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/chyroc/go-aliyundrive/internal/helper_qrcode"
+	"github.com/mdp/qrterminal"
 )
 
 func IsTokenExpired(err error) bool {
@@ -78,10 +79,8 @@ func (r *AuthService) internalLoginByQrcode(ctx context.Context) error {
 		return err
 	}
 
-	err = helper_qrcode.New(true).Print(qrcode.CodeContent, helper_qrcode.Low)
-	if err != nil {
-		return err
-	}
+	qrterminal.Generate(qrcode.CodeContent, qrterminal.L, os.Stdout)
+
 	fmt.Println("请用阿里云盘 App 扫码")
 
 	scaned := false
