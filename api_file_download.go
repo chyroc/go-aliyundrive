@@ -117,8 +117,8 @@ const (
 var downloadHttpClient = http.Client{}
 
 func downloadURL(url string, filename string, showProgressBar bool) error {
-	var deleteTemp = true
-	var tmp = filename + ".tmp"
+	deleteTemp := true
+	tmp := filename + ".tmp"
 	defer func() {
 		// 任何的异常退出都会导致临时文件被删除
 		if deleteTemp {
