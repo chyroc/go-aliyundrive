@@ -22,11 +22,3 @@ jobs:
 
     - name: Build
       run: go build -v ./...
-
-    - name: Test
-      run: |
-        export IN_CI=1
-        ./.github/test.sh
-
-    - name: Upload Cov
-      run: bash <(curl -s https://codecov.io/bash)
