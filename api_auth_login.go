@@ -28,13 +28,18 @@ import (
 	"time"
 
 	"github.com/mdp/qrterminal"
+	qrcode2 "github.com/skip2/go-qrcode"
 )
 
 func IsTokenExpired(err error) bool {
 	return err != nil && strings.Contains(err.Error(), "AccessTokenExpired")
 }
 
-func (r *AuthService) LoginByQrcode(ctx context.Context) (*GetSelfUserResp, error) {
+type LoginByQrcodeReq struct {
+	SmallQrCode bool
+}
+
+func (r *AuthService) LoginByQrcode(ctx context.Context, request *LoginByQrcodeReq) (*GetSelfUserResp, error) {
 	userInfo, err := r.GetSelfUser(ctx)
 	if IsTokenExpired(err) {
 		token, err := r.cli.store.Get(ctx, "")
@@ -63,14 +68,14 @@ func (r *AuthService) LoginByQrcode(ctx context.Context) (*GetSelfUserResp, erro
 	if err != nil {
 		return nil, err
 	}
-	if err := r.internalLoginByQrcode(ctx); err != nil {
+	if err := r.internalLoginByQrcode(ctx, request); err != nil {
 		return nil, err
 	}
 
 	return r.GetSelfUser(ctx)
 }
 
-func (r *AuthService) internalLoginByQrcode(ctx context.Context) error {
+func (r *AuthService) internalLoginByQrcode(ctx context.Context, request *LoginByQrcodeReq) error {
 	if err := r.preLogin(ctx); err != nil {
 		return err
 	}
@@ -80,7 +85,12 @@ func (r *AuthService) internalLoginByQrcode(ctx context.Context) error {
 		return err
 	}
 
-	qrterminal.Generate(qrcode.CodeContent, qrterminal.L, os.Stdout)
+	if request != nil && request.SmallQrCode {
+		obj, _ := qrcode2.New(qrcode.CodeContent, qrcode2.Low)
+		fmt.Print(obj.ToSmallString(false))
+	} else {
+		qrterminal.Generate(qrcode.CodeContent, qrterminal.L, os.Stdout)
+	}
 
 	fmt.Println("请用阿里云盘 App 扫码")
 
