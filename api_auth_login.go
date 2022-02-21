@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -308,6 +309,21 @@ func (r *AuthService) confirmLogin(ctx context.Context, accessToken string) erro
 
 		if _, err := r.cli.RawRequest(ctx, req, nil); err != nil {
 			return err
+		}
+	}
+
+	{
+		gotoURL2, _ := url.Parse(gotoURL)
+		if gotoURL2 != nil {
+			resp, err := r.getToken(ctx, &getTokenReq{
+				Code: gotoURL2.Query().Get("code"),
+			})
+			if err != nil {
+				return err
+			}
+			if err = r.cli.store.Set(ctx, resp.Token()); err != nil {
+				r.cli.log(ctx, LogLevelError, "set token failed: %s", err)
+			}
 		}
 	}
 	return nil
