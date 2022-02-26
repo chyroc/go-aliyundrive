@@ -48,6 +48,23 @@ func (r *AuthService) GetToken(ctx context.Context) (*Token, error) {
 	return token, nil
 }
 
+func (r *AuthService) LoginByRefreshToken(ctx context.Context, refreshToken string) (*GetSelfUserResp, error) {
+	token, err := r.RefreshToken(ctx, &RefreshTokenReq{
+		RefreshToken: refreshToken,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.cli.store.Set(ctx, token.Token())
+	if err != nil {
+		return nil, err
+	}
+
+	return r.GetSelfUser(ctx)
+}
+
 func (r *AuthService) LoginByQrcode(ctx context.Context, request *LoginByQrcodeReq) (*GetSelfUserResp, error) {
 	userInfo, err := r.GetSelfUser(ctx)
 	if IsTokenExpired(err) {
