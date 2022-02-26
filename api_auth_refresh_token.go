@@ -17,27 +17,39 @@ package aliyundrive
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 )
 
 func (r *AuthService) RefreshToken(ctx context.Context, request *RefreshTokenReq) (*RefreshTokenResp, error) {
+	request.GrantType = "refresh_token"
+
 	req := &RawRequestReq{
 		Scope:  "Auth",
 		API:    "RefreshToken",
 		Method: http.MethodPost,
-		URL:    "https://api.aliyundrive.com/token/refresh",
-		Body:   request,
+		// URL:    "https://api.aliyundrive.com/token/refresh",j
+		// @see https://github.com/wxy1343/aliyunpan/blob/1dd7309196f77a9420b17c2d87df37e8b0193138/aliyunpan/api/core.py#L581
+		URL:  "https://auth.aliyundrive.com/v2/account/token",
+		Body: request,
 	}
 	resp := new(RefreshTokenResp)
 
-	if _, err := r.cli.RawRequest(ctx, req, resp); err != nil {
+	result, err := r.cli.RawRequest(ctx, req, resp)
+	if err != nil {
 		return nil, err
 	}
+
+	if result.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("api server response an error")
+	}
+
 	return resp, nil // r.cli.token.Refresh(resp.AccessToken, resp.RefreshToken, time.Now().Add(time.Second*time.Duration(resp.ExpiresIn)))
 }
 
 type RefreshTokenReq struct {
+	GrantType    string `json:"grant_type"`
 	RefreshToken string `json:"refresh_token"`
 }
 

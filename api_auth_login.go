@@ -39,10 +39,19 @@ type LoginByQrcodeReq struct {
 	SmallQrCode bool
 }
 
+func (r *AuthService) GetToken(ctx context.Context) (*Token, error) {
+	token, err := r.cli.store.Get(ctx, "")
+	if err != nil || token.RefreshToken == "" {
+		return nil, err
+	}
+
+	return token, nil
+}
+
 func (r *AuthService) LoginByQrcode(ctx context.Context, request *LoginByQrcodeReq) (*GetSelfUserResp, error) {
 	userInfo, err := r.GetSelfUser(ctx)
 	if IsTokenExpired(err) {
-		token, err := r.cli.store.Get(ctx, "")
+		token, err := r.GetToken(ctx)
 		if err != nil {
 			r.cli.log(ctx, LogLevelError, "get user failed, then get store failed: %s", err)
 		} else if token.RefreshToken != "" {

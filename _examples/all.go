@@ -14,7 +14,9 @@ func main() {
 	ctx := context.Background()
 
 	// 扫码登录
-	user, err := r.Auth.LoginByQrcode(ctx)
+	user, err := r.Auth.LoginByQrcode(ctx, &aliyundrive.LoginByQrcodeReq{
+		SmallQrCode: true,
+	})
 	assert(err)
 
 	fmt.Println("user:", jsonString(user))
