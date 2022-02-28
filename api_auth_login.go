@@ -57,8 +57,7 @@ func (r *AuthService) LoginByRefreshToken(ctx context.Context, refreshToken stri
 		return nil, err
 	}
 
-	err = r.cli.store.Set(ctx, token.Token())
-	if err != nil {
+	if err = r.cli.store.Set(ctx, token.Token()); err != nil {
 		return nil, err
 	}
 

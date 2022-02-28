@@ -9,7 +9,7 @@ import (
 )
 
 func TestAuthService_RefreshToken(t *testing.T) {
-	RefreshToken, empty := os.LookupEnv("REFRESH_TOKEN")
+	refreshToken, empty := os.LookupEnv("REFRESH_TOKEN")
 	if !empty {
 		return
 	}
@@ -18,7 +18,7 @@ func TestAuthService_RefreshToken(t *testing.T) {
 
 	// 获取 refresh_token 可以通过网页端： JSON.parse(localStorage.token).refresh_token
 	token, err := cli.Auth.RefreshToken(context.TODO(), &RefreshTokenReq{
-		RefreshToken: RefreshToken,
+		RefreshToken: refreshToken,
 	})
 
 	assert.NoError(t, err)
