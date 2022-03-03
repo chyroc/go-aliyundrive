@@ -23,6 +23,9 @@ import (
 	"os"
 	"path"
 	"time"
+
+	runewidth "github.com/mattn/go-runewidth"
+	"github.com/schollz/progressbar/v3"
 )
 
 func (r *FileService) UploadFile(ctx context.Context, request *UploadFileReq) (*UploadFileResp, error) {
@@ -38,7 +41,10 @@ func (r *FileService) UploadFile(ctx context.Context, request *UploadFileReq) (*
 		// TODO：支持文件夹
 		return nil, fmt.Errorf("unsupport dir upload")
 	}
-	return r.UploadStream(ctx, request.DriveID, request.ParentID, path.Base(fileInfo.Name()), file, fileInfo.Size())
+
+	bar := progressbar.DefaultBytes(fileInfo.Size(), runewidth.FillRight(path.Base(fileInfo.Name()), 40))
+	reader := progressbar.NewReader(file, bar)
+	return r.UploadStream(ctx, request.DriveID, request.ParentID, path.Base(fileInfo.Name()), io.Reader(&reader), fileInfo.Size())
 }
 
 type UploadFileReq struct {
