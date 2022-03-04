@@ -30,7 +30,7 @@ func main() {
 	)
 	ctx := context.TODO()
 
-	user, err := ins.Auth.LoginByQrcode(ctx)
+	user, err := ins.Auth.LoginByQrcode(ctx, &aliyundrive.LoginByQrcodeReq{})
 	if err != nil {
 		panic(err)
 	}
