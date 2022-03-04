@@ -41,16 +41,21 @@ func (r *FileService) UploadFile(ctx context.Context, request *UploadFileReq) (*
 		// TODO：支持文件夹
 		return nil, fmt.Errorf("unsupport dir upload")
 	}
-
-	bar := progressbar.DefaultBytes(fileInfo.Size(), runewidth.FillRight(path.Base(fileInfo.Name()), 40))
-	reader := progressbar.NewReader(file, bar)
-	return r.UploadStream(ctx, request.DriveID, request.ParentID, path.Base(fileInfo.Name()), io.Reader(&reader), fileInfo.Size())
+	if request.ShowProgressBar {
+		bar := progressbar.DefaultBytes(fileInfo.Size(), runewidth.FillRight(path.Base(fileInfo.Name()), 40))
+		reader := progressbar.NewReader(file, bar)
+		return r.UploadStream(ctx, request.DriveID, request.ParentID, path.Base(fileInfo.Name()), io.Reader(&reader), fileInfo.Size())
+	} else {
+		return r.UploadStream(ctx, request.DriveID, request.ParentID, path.Base(fileInfo.Name()), file, fileInfo.Size())
+	}
 }
 
 type UploadFileReq struct {
-	DriveID  string
-	ParentID string
-	FilePath string
+	DriveID         string
+	ParentID        string
+	FilePath        string
+	ShowProgressBar bool // 展示上传进度条
+
 }
 
 type UploadFileResp struct {
