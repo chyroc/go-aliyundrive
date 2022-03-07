@@ -161,6 +161,7 @@ func downloadURL(url string, filename string, showProgressBar bool) error {
 			return err
 		}
 	}
+	f.Close()
 	if err := os.Rename(tmp, filename); err != nil {
 		return err
 	}
