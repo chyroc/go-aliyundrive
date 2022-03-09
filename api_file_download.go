@@ -147,11 +147,14 @@ func downloadURL(url string, filename string, showProgressBar bool) error {
 	defer resp.Body.Close()
 
 	if showProgressBar {
-		bar := progressbar.DefaultBytes(
-			resp.ContentLength,
-			runewidth.FillRight(path.Base(filename), 40),
+		bar := progressbar.NewOptions(
+			int(resp.ContentLength),
+			progressbar.OptionSetWriter(os.Stdout),
+			progressbar.OptionSetDescription(runewidth.FillRight(path.Base(filename), 40)),
+			progressbar.OptionOnCompletion(func() {
+				fmt.Printf("\n")
+			}),
 		)
-
 		if _, err := io.Copy(io.MultiWriter(f, bar), resp.Body); err != nil {
 			return err
 		}
