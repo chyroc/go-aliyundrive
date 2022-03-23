@@ -42,7 +42,14 @@ func (r *FileService) UploadFile(ctx context.Context, request *UploadFileReq) (*
 		return nil, fmt.Errorf("unsupport dir upload")
 	}
 	if request.ShowProgressBar {
-		bar := progressbar.DefaultBytes(fileInfo.Size(), runewidth.FillRight(path.Base(fileInfo.Name()), 40))
+		bar := progressbar.NewOptions(
+			int(fileInfo.Size()),
+			progressbar.OptionSetWriter(os.Stdout),
+			progressbar.OptionSetDescription(runewidth.FillRight(path.Base(fileInfo.Name()), 40)),
+			progressbar.OptionOnCompletion(func() {
+				fmt.Printf("\n")
+			}),
+		)
 		reader := progressbar.NewReader(file, bar)
 		return r.UploadStream(ctx, request.DriveID, request.ParentID, path.Base(fileInfo.Name()), io.Reader(&reader), fileInfo.Size())
 	} 
