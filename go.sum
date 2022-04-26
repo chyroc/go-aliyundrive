@@ -1,5 +1,5 @@
-github.com/chyroc/gorequests v0.32.0 h1:+UVJd/qA/b0W0/gzh9K+VGkpTqctrjuVvD2rB6hvlwI=
-github.com/chyroc/gorequests v0.32.0/go.mod h1:CZDj+0SZvzDtZsFKnX971eHls2bwUtGXTcmQ6by9ONA=
+github.com/chyroc/gorequests v0.33.0 h1:04ydHCOaLYt/JWusaZoKR4x/jtGRJqKN1z+ZjW6vONA=
+github.com/chyroc/gorequests v0.33.0/go.mod h1:CZDj+0SZvzDtZsFKnX971eHls2bwUtGXTcmQ6by9ONA=
 github.com/chyroc/persistent-cookiejar v0.1.0 h1:F7rGmT5sShfskgbZmN9MOUJS8CwcSsm8KbErcAPUO5s=
 github.com/chyroc/persistent-cookiejar v0.1.0/go.mod h1:eb/Xy6R1GfUrLpPD8AdIxnZ0dbihI6yDITF3btgmnJU=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
