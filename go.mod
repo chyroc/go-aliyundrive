@@ -6,7 +6,7 @@ require (
 	github.com/chyroc/gorequests v0.33.0
 	github.com/mattn/go-runewidth v0.0.13
 	github.com/mdp/qrterminal v1.0.1
-	github.com/schollz/progressbar/v3 v3.8.7
+	github.com/schollz/progressbar/v3 v3.9.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.8.0
