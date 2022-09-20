@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/chyroc/gorequests v0.33.0
-	github.com/mattn/go-runewidth v0.0.13
+	github.com/mattn/go-runewidth v0.0.14
 	github.com/mdp/qrterminal v1.0.1
 	github.com/schollz/progressbar/v3 v3.10.0
 	github.com/sirupsen/logrus v1.9.0
