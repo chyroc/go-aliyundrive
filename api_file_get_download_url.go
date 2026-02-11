@@ -32,6 +32,11 @@ func (r *FileService) GetFileDownloadURL(ctx context.Context, request *GetFileDo
 	}
 	resp := new(getFileDownloadURLResp)
 
+	// 设置默认过期时间为 900 秒（15分钟）
+	if request.ExpireSec == 0 {
+		request.ExpireSec = 900
+	}
+
 	if _, err := r.cli.RawRequest(ctx, req, resp); err != nil {
 		return nil, err
 	}
@@ -39,8 +44,9 @@ func (r *FileService) GetFileDownloadURL(ctx context.Context, request *GetFileDo
 }
 
 type GetFileDownloadURLReq struct {
-	DriveID string `json:"drive_id"`
-	FileID  string `json:"file_id"`
+	DriveID   string `json:"drive_id"`
+	FileID    string `json:"file_id"`
+	ExpireSec int    `json:"expire_sec"`
 }
 
 type GetFileDownloadURLResp struct {

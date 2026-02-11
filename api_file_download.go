@@ -57,7 +57,8 @@ func (r *FileService) DownloadFile(ctx context.Context, request *DownloadFileReq
 		}
 	}
 
-	res, err := r.GetFileDownloadURL(ctx, &GetFileDownloadURLReq{
+	// 使用新的 DownloadFile API 获取下载链接（302 跳转）
+	url, err := r.GetFileDownloadURLV2(ctx, &GetFileDownloadURLReq{
 		DriveID: request.DriveID,
 		FileID:  request.FileID,
 	})
@@ -65,7 +66,7 @@ func (r *FileService) DownloadFile(ctx context.Context, request *DownloadFileReq
 		return err
 	}
 
-	err = downloadURL(res.URL, distName, request.ShowProgressBar)
+	err = downloadURL(ctx, url, distName, request.ShowProgressBar)
 	if err != nil {
 		return err
 	}
@@ -74,17 +75,19 @@ func (r *FileService) DownloadFile(ctx context.Context, request *DownloadFileReq
 
 // DownloadFileStream 获取文件流
 func (r *FileService) DownloadFileStream(ctx context.Context, driveID, fileID string) (io.ReadCloser, error) {
-	res, err := r.GetFileDownloadURL(ctx, &GetFileDownloadURLReq{DriveID: driveID, FileID: fileID})
+	// 使用新的 DownloadFile API 获取下载链接（302 跳转）
+	downloadURL, err := r.GetFileDownloadURLV2(ctx, &GetFileDownloadURLReq{DriveID: driveID, FileID: fileID})
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, res.URL, nil)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Referer", "https://www.aliyundrive.com/")
-	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
+	// 不设置 Accept-Encoding，让 Go 自动处理 gzip 解压缩
 	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
 
 	resp, err := downloadHttpClient.Do(req)
@@ -116,54 +119,84 @@ const (
 
 var downloadHttpClient = http.Client{}
 
-func downloadURL(url string, filename string, showProgressBar bool) error {
+func downloadURL(ctx context.Context, url string, filename string, showProgressBar bool) error {
 	deleteTemp := true
 	tmp := filename + ".tmp"
 	defer func() {
-		// 任何的异常退出都会导致临时文件被删除
 		if deleteTemp {
 			os.Remove(tmp)
 		}
 	}()
+
 	f, err := os.Create(tmp)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	// 创建带超时的 HTTP 客户端，便于中断
+	client := &http.Client{
+		Timeout: 0, // 不设置总超时，但使用 context 控制
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Referer", "https://www.aliyundrive.com/")
-	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
 	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
 
-	resp, err := downloadHttpClient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	if showProgressBar {
-		bar := progressbar.NewOptions(
-			int(resp.ContentLength),
-			progressbar.OptionSetWriter(os.Stdout),
-			progressbar.OptionSetDescription(runewidth.FillRight(path.Base(filename), 40)),
-			progressbar.OptionOnCompletion(func() {
-				fmt.Printf("\n")
-			}),
-		)
-		if _, err := io.Copy(io.MultiWriter(f, bar), resp.Body); err != nil {
-			return err
+	// 使用通道和 goroutine 来支持中断
+	type result struct {
+		n   int64
+		err error
+	}
+
+	done := make(chan result, 1)
+
+	go func() {
+		var n int64
+		var err error
+
+		if showProgressBar {
+			bar := progressbar.NewOptions(
+				int(resp.ContentLength),
+				progressbar.OptionSetWriter(os.Stdout),
+				progressbar.OptionSetDescription(runewidth.FillRight(path.Base(filename), 40)),
+				progressbar.OptionShowBytes(true),
+				progressbar.OptionSetPredictTime(true),
+				progressbar.OptionFullWidth(),
+				progressbar.OptionSetRenderBlankState(true),
+				progressbar.OptionOnCompletion(func() {
+					fmt.Printf("\n")
+				}),
+			)
+			n, err = io.Copy(io.MultiWriter(f, bar), resp.Body)
+		} else {
+			n, err = io.Copy(f, resp.Body)
 		}
 
-	} else {
-		if _, err := io.Copy(f, resp.Body); err != nil {
-			return err
+		done <- result{n: n, err: err}
+	}()
+
+	select {
+	case <-ctx.Done():
+		// context 被取消，关闭连接
+		resp.Body.Close()
+		return ctx.Err()
+	case res := <-done:
+		if res.err != nil {
+			return res.err
 		}
 	}
+
 	f.Close()
 	if err := os.Rename(tmp, filename); err != nil {
 		return err
