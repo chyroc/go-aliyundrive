@@ -37,6 +37,20 @@ func (r *FileService) DeleteFile(ctx context.Context, request *DeleteFileReq) (*
 	return &resp.DeleteFileResp, nil
 }
 
+// CompletelyDeleteFile 彻底删除文件
+func (r *FileService) CompletelyDeleteFile(ctx context.Context, request *DeleteFileReq) error {
+	req := &RawRequestReq{
+		Scope:  "File",
+		API:    "CompletelyDeleteFile",
+		Method: http.MethodPost,
+		URL:    "https://api.aliyundrive.com/v3/file/delete",
+		Body:   request,
+	}
+
+	_, err := r.cli.RawRequest(ctx, req, nil)
+	return err
+}
+
 type DeleteFileReq struct {
 	DriveID string `json:"drive_id"`
 	FileID  string `json:"file_id"`
